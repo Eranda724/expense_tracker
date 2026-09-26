@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'features/auth/providers/auth_providers.dart';
+import 'features/auth/presentation/login_screen.dart';
+
 import 'firebase_options.dart';
 
 void main() async {
@@ -10,14 +13,22 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+
     return MaterialApp(
       title: 'Expense Tracker',
-      home: const Scaffold(body: Center(child: Text('Firebase connected'))),
+      home: authState.when(
+        data: (user) => user == null
+            ? const LoginScreen()
+            : const Scaffold(body: Center(child: Text('Logged in — Home screen next'))),
+        loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+        error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
+      ),
     );
   }
 }
