@@ -5,6 +5,7 @@ import '../../../../core/widgets/state_widgets.dart';
 import '../../../auth/providers/auth_providers.dart';
 import '../../providers/expense_providers.dart';
 import '../widgets/expense_tile.dart';
+import 'add_edit_expense_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -44,7 +45,14 @@ class HomeScreen extends ConsumerWidget {
               return ExpenseTile(
                 expense: expense,
                 onTap: () {
-                  // Phase 4: navigate to edit screen
+                  // navigate to edit screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          AddEditExpenseScreen(existingExpense: expense),
+                    ),
+                  );
                 },
                 onDelete: () {
                   ref
