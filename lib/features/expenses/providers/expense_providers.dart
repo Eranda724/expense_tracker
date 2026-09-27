@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/providers/auth_providers.dart';
@@ -59,3 +60,40 @@ final categorySummaryProvider =
         return map;
       });
     });
+
+/// null means "all categories" — no filter applied.
+final categoryFilterProvider = StateProvider<ExpenseCategory?>((ref) => null);
+
+/// null means "no date range filter" — falls back to month view.
+final dateRangeFilterProvider = StateProvider<DateTimeRange?>((ref) => null);
+
+final searchQueryProvider = StateProvider<String>((ref) => '');
+
+/// Combines month, category filter, date-range filter, and search into one final list.
+/// Date range (if set) takes priority over the month selector, since picking an explicit
+/// range is a more specific user intent than the default month view.
+final filteredExpensesProvider = Provider<AsyncValue<List<Expense>>>((ref) {
+  final dateRange = ref.watch(dateRangeFilterProvider);
+  final baseAsync = dateRange != null
+      ? ref.watch(expensesStreamProvider)
+      : ref.watch(monthlyExpensesProvider);
+  final category = ref.watch(categoryFilterProvider);
+  final query = ref.watch(searchQueryProvider).trim().toLowerCase();
+
+  return baseAsync.whenData((expenses) {
+    return expenses.where((e) {
+      if (dateRange != null) {
+        final afterStart = !e.date.isBefore(dateRange.start);
+        final beforeEnd = !e.date.isAfter(dateRange.end);
+        if (!afterStart || !beforeEnd) return false;
+      }
+      if (category != null && e.category != category) return false;
+      if (query.isNotEmpty) {
+        final inTitle = e.title.toLowerCase().contains(query);
+        final inNote = (e.note ?? '').toLowerCase().contains(query);
+        if (!inTitle && !inNote) return false;
+      }
+      return true;
+    }).toList();
+  });
+});

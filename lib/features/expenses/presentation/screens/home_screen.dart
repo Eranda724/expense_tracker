@@ -7,13 +7,15 @@ import '../../providers/expense_providers.dart';
 import '../widgets/expense_tile.dart';
 import 'add_edit_expense_screen.dart';
 import '../widgets/month_summary_card.dart';
+import '../widgets/filter_bar.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expensesAsync = ref.watch(expensesStreamProvider);
+    // Watch filtered async expenses
+    final filteredAsync = ref.watch(filteredExpensesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -25,18 +27,26 @@ class HomeScreen extends ConsumerWidget {
                 ref.read(authControllerProvider.notifier).signOut(),
           ),
         ],
+        bottom: const FilterBar(),
       ),
-      body: expensesAsync.when(
+      body: filteredAsync.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(
           message: 'Failed to load expenses.\n$e',
-          onRetry: () => ref.invalidate(expensesStreamProvider),
+          onRetry: () => ref.invalidate(filteredExpensesProvider),
         ),
         data: (expenses) {
           if (expenses.isEmpty) {
-            return const EmptyView(
-              message: 'No expenses yet.\nTap + to add your first one.',
-              icon: Icons.receipt_long_outlined,
+            return Column(
+              children: [
+                const MonthSummaryCard(),
+                const Expanded(
+                  child: EmptyView(
+                    message: 'No expenses matched your filter.\nOr tap + to add one.',
+                    icon: Icons.receipt_long_outlined,
+                  ),
+                ),
+              ],
             );
           }
           return Column(
@@ -74,7 +84,10 @@ class HomeScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Phase 4: navigate to add screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddEditExpenseScreen()),
+          );
         },
         child: const Icon(Icons.add),
       ),
