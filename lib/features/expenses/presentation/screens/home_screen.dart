@@ -30,7 +30,14 @@ class HomeScreen extends ConsumerWidget {
                   ? Icons.light_mode
                   : Icons.dark_mode,
             ),
+            tooltip: 'Toggle theme',
             onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign out',
+            onPressed: () =>
+                ref.read(authControllerProvider.notifier).signOut(),
           ),
         ],
         bottom: const FilterBar(),

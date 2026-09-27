@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -53,7 +54,7 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
       context: context,
       initialDate: _date,
       firstDate: DateTime(2000),
-      lastDate: DateTime.now(), // no future-dated expenses
+      lastDate: DateTime.now(),
     );
     if (picked != null) setState(() => _date = picked);
   }
@@ -108,29 +109,37 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
           key: _formKey,
           child: ListView(
             children: [
+              // Title — capped at 50 chars
               TextFormField(
                 controller: _titleCtrl,
+                maxLength: 50,
                 decoration: const InputDecoration(labelText: 'Title'),
                 validator: (v) => (v == null || v.trim().isEmpty)
                     ? 'Title is required'
                     : null,
               ),
               const SizedBox(height: 12),
+              // Amount — restricted to 2 dp at input level
               TextFormField(
                 controller: _amountCtrl,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                ],
                 decoration: const InputDecoration(
                   labelText: 'Amount',
-                  prefixText: '\$ ',
+                  prefixText: r'$ ',
                 ),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty)
+                  if (v == null || v.trim().isEmpty) {
                     return 'Amount is required';
+                  }
                   final parsed = double.tryParse(v.trim());
                   if (parsed == null) return 'Enter a valid number';
                   if (parsed <= 0) return 'Amount must be greater than 0';
+                  if (parsed > 1000000) return 'Amount seems too large';
                   return null;
                 },
               ),
@@ -154,10 +163,12 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
                 onTap: _pickDate,
               ),
               const SizedBox(height: 12),
+              // Note — capped at 200 chars
               TextFormField(
                 controller: _noteCtrl,
                 decoration: const InputDecoration(labelText: 'Note (optional)'),
                 maxLines: 3,
+                maxLength: 200,
               ),
               if (_errorText != null) ...[
                 const SizedBox(height: 12),

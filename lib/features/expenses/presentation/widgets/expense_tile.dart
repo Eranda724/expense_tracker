@@ -56,7 +56,11 @@ class ExpenseTile extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         leading: CircleAvatar(child: Text(expense.category.label[0])),
-        title: Text(expense.title),
+        title: Text(
+          expense.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: Text('${expense.category.label} • $dateStr'),
         trailing: Text(
           currency.format(expense.amount),
