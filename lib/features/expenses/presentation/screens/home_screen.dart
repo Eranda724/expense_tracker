@@ -6,6 +6,7 @@ import '../../../auth/providers/auth_providers.dart';
 import '../../providers/expense_providers.dart';
 import '../widgets/expense_tile.dart';
 import 'add_edit_expense_screen.dart';
+import '../widgets/month_summary_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -38,29 +39,36 @@ class HomeScreen extends ConsumerWidget {
               icon: Icons.receipt_long_outlined,
             );
           }
-          return ListView.builder(
-            itemCount: expenses.length,
-            itemBuilder: (context, index) {
-              final expense = expenses[index];
-              return ExpenseTile(
-                expense: expense,
-                onTap: () {
-                  // navigate to edit screen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          AddEditExpenseScreen(existingExpense: expense),
-                    ),
-                  );
-                },
-                onDelete: () {
-                  ref
-                      .read(expenseRepositoryProvider)
-                      ?.deleteExpense(expense.id);
-                },
-              );
-            },
+          return Column(
+            children: [
+              const MonthSummaryCard(),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: expenses.length,
+                  itemBuilder: (context, index) {
+                    final expense = expenses[index];
+                    return ExpenseTile(
+                      expense: expense,
+                      onTap: () {
+                        // navigate to edit screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                AddEditExpenseScreen(existingExpense: expense),
+                          ),
+                        );
+                      },
+                      onDelete: () {
+                        ref
+                            .read(expenseRepositoryProvider)
+                            ?.deleteExpense(expense.id);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),
