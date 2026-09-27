@@ -8,6 +8,9 @@ import '../widgets/expense_tile.dart';
 import 'add_edit_expense_screen.dart';
 import '../widgets/month_summary_card.dart';
 import '../widgets/filter_bar.dart';
+import '../widgets/category_chart.dart';
+
+import '../../../../core/theme/theme_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -22,9 +25,12 @@ class HomeScreen extends ConsumerWidget {
         title: const Text('Expense Tracker'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () =>
-                ref.read(authControllerProvider.notifier).signOut(),
+            icon: Icon(
+              ref.watch(themeModeProvider) == ThemeMode.dark
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
           ),
         ],
         bottom: const FilterBar(),
@@ -52,6 +58,10 @@ class HomeScreen extends ConsumerWidget {
           return Column(
             children: [
               const MonthSummaryCard(),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: CategoryChart(),
+              ),
               Expanded(
                 child: ListView.builder(
                   itemCount: expenses.length,

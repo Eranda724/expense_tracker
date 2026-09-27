@@ -7,6 +7,9 @@ import 'features/auth/presentation/login_screen.dart';
 
 import 'features/expenses/presentation/screens/home_screen.dart';
 
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
+
 import 'firebase_options.dart';
 
 void main() async {
@@ -21,9 +24,13 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp(
       title: 'Expense Tracker',
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeMode,
       home: authState.when(
         data: (user) => user == null ? const LoginScreen() : const HomeScreen(),
         loading: () =>
