@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/auth/providers/auth_providers.dart';
 import 'features/auth/presentation/login_screen.dart';
 
+import 'features/expenses/presentation/screens/home_screen.dart';
+
 import 'firebase_options.dart';
 
 void main() async {
@@ -23,10 +25,9 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Expense Tracker',
       home: authState.when(
-        data: (user) => user == null
-            ? const LoginScreen()
-            : const Scaffold(body: Center(child: Text('Logged in — Home screen next'))),
-        loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+        data: (user) => user == null ? const LoginScreen() : const HomeScreen(),
+        loading: () =>
+            const Scaffold(body: Center(child: CircularProgressIndicator())),
         error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
       ),
     );
