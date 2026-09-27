@@ -9,97 +9,88 @@ class MonthSummaryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedMonth = ref.watch(selectedMonthProvider);
-    final totalAsync = ref.watch(monthlyTotalProvider);
-    final categoryAsync = ref.watch(categorySummaryProvider);
-    final currency = NumberFormat.currency(symbol: '\$');
+    final monthTotalAsync = ref.watch(monthlyTotalProvider);
 
-    return Card(
-      margin: const EdgeInsets.all(12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.chevron_left),
-                  onPressed: () {
-                    ref.read(selectedMonthProvider.notifier).state = DateTime(
-                      selectedMonth.year,
-                      selectedMonth.month - 1,
-                      1,
-                    );
-                  },
-                ),
-                Text(
-                  DateFormat('MMMM yyyy').format(selectedMonth),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
-                  onPressed: () {
-                    ref.read(selectedMonthProvider.notifier).state = DateTime(
-                      selectedMonth.year,
-                      selectedMonth.month + 1,
-                      1,
-                    );
-                  },
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF4A5A6D).withOpacity(0.9),
+            const Color(0xFF334254).withOpacity(0.9),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2C394B),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  spreadRadius: 1,
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            totalAsync.when(
-              loading: () => const LinearProgressIndicator(),
-              error: (e, _) => Text(
-                'Error loading total',
-                style: TextStyle(color: Colors.red[300]),
-              ),
-              data: (total) => Text(
-                'Total: ${currency.format(total)}',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            child: const Icon(
+              Icons.trending_up,
+              size: 40,
+              color: Color(0xFF3DF2A4),
             ),
-            const SizedBox(height: 12),
-            categoryAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (e, _) => const SizedBox.shrink(),
-              data: (map) {
-                if (map.isEmpty) {
-                  return const Text(
-                    'No expenses this month',
-                    style: TextStyle(color: Colors.grey),
-                  );
-                }
-                final sortedEntries = map.entries.toList()
-                  ..sort((a, b) => b.value.compareTo(a.value));
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: sortedEntries.map((entry) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(entry.key.name),
-                          Text(currency.format(entry.value)),
-                        ],
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'This Month Expences',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 228, 211, 118),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                monthTotalAsync.when(
+                  data: (total) {
+                    final f = NumberFormat.currency(symbol: '\$');
+                    return Text(
+                      'Total: ${f.format(total)}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                       ),
                     );
-                  }).toList(),
-                );
-              },
+                  },
+                  loading: () =>
+                      const CircularProgressIndicator(color: Color(0xFF3DF2A4)),
+                  error: (_, __) => const Text(
+                    'Error',
+                    style: TextStyle(color: Colors.redAccent),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

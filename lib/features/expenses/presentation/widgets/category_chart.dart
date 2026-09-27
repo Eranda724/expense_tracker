@@ -50,7 +50,7 @@ class CategoryChart extends ConsumerWidget {
             value: entry.value,
             color: _colors[entry.key],
             title: '${percent.toStringAsFixed(0)}%',
-            radius: 60,
+            radius: 50,
             titleStyle: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -59,35 +59,64 @@ class CategoryChart extends ConsumerWidget {
           );
         }).toList();
 
-        return Column(
-          children: [
-            SizedBox(
-              height: 200,
-              child: PieChart(
-                PieChartData(
-                  sections: sections,
-                  centerSpaceRadius: 40,
-                  sectionsSpace: 2,
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 238, 232, 232), // ash color
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: SizedBox(
+                  height: 160,
+                  child: PieChart(
+                    PieChartData(
+                      sections: sections,
+                      centerSpaceRadius: 25,
+                      sectionsSpace: 2,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            // Legend — pie slices alone don't label which color is which category.
-            Wrap(
-              spacing: 12,
-              runSpacing: 6,
-              children: map.keys.map((cat) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(width: 10, height: 10, color: _colors[cat]),
-                    const SizedBox(width: 4),
-                    Text(cat.label, style: const TextStyle(fontSize: 12)),
-                  ],
-                );
-              }).toList(),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: map.keys.map((cat) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: _colors[cat],
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                cat.label,
+                                style: const TextStyle(fontSize: 10),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

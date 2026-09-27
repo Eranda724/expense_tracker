@@ -3,43 +3,49 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/categories.dart';
+import '../../data/models/expense.dart';
 import '../../providers/expense_providers.dart';
 
-// Sentinel range used to signal "user pressed Clear" inside the dialog
 final _kClearSentinel = DateTimeRange(
   start: DateTime(1970),
   end: DateTime(1970),
 );
 
+bool _isSameDay(DateTime a, DateTime b) {
+  return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
 Future<DateTimeRange?> _showCustomDatePicker(
   BuildContext context, {
   DateTimeRange? initialRange,
 }) async {
-  return showDialog<DateTimeRange>(
+  return await showDialog<DateTimeRange>(
     context: context,
-    builder: (_) => _DatePickerDialog(initial: initialRange),
+    builder: (ctx) => _CustomDateRangePickerDialog(initialRange: initialRange),
   );
 }
 
-class _DatePickerDialog extends StatefulWidget {
-  const _DatePickerDialog({this.initial});
-  final DateTimeRange? initial;
+class _CustomDateRangePickerDialog extends StatefulWidget {
+  final DateTimeRange? initialRange;
+  const _CustomDateRangePickerDialog({this.initialRange});
 
   @override
-  State<_DatePickerDialog> createState() => _DatePickerDialogState();
+  State<_CustomDateRangePickerDialog> createState() =>
+      _CustomDateRangePickerDialogState();
 }
 
-class _DatePickerDialogState extends State<_DatePickerDialog> {
-  late DateTime _focusedMonth;
+class _CustomDateRangePickerDialogState
+    extends State<_CustomDateRangePickerDialog> {
   DateTime? _start;
   DateTime? _end;
+  late DateTime _focusedMonth;
 
   @override
   void initState() {
     super.initState();
-    if (widget.initial != null) {
-      _start = widget.initial!.start;
-      _end = widget.initial!.end;
+    if (widget.initialRange != null) {
+      _start = widget.initialRange!.start;
+      _end = widget.initialRange!.end;
       _focusedMonth = DateTime(_start!.year, _start!.month);
     } else {
       final now = DateTime.now();
@@ -47,106 +53,100 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     }
   }
 
-  bool _isSameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
-
-  bool _isInRange(DateTime d) {
-    if (_start == null || _end == null) return false;
-    final day = DateTime(d.year, d.month, d.day);
-    final s = DateTime(_start!.year, _start!.month, _start!.day);
-    final e = DateTime(_end!.year, _end!.month, _end!.day);
-    return day.isAfter(s) && day.isBefore(e);
-  }
-
-  void _onDayTap(DateTime day) {
+  void _handleTap(DateTime d) {
     setState(() {
       if (_start == null || (_start != null && _end != null)) {
-        _start = day;
+        _start = d;
         _end = null;
       } else {
-        if (day.isBefore(_start!)) {
-          _end = _start;
-          _start = day;
+        if (d.isBefore(_start!)) {
+          _start = d;
         } else {
-          _end = day; // same day or later
+          _end = d;
         }
       }
     });
   }
 
-  Widget _buildDay(DateTime day, bool inMonth) {
-    final isStart = _start != null && _isSameDay(day, _start!);
-    final isEnd = _end != null && _isSameDay(day, _end!);
-    final inRange = _isInRange(day);
-    final today = DateTime.now();
-    final isFuture = day.isAfter(DateTime(today.year, today.month, today.day));
-
-    Color? bg;
-    Color textColor = inMonth && !isFuture ? Colors.black87 : Colors.black26;
-    if (isStart || isEnd) {
-      bg = Theme.of(context).colorScheme.primary;
-      textColor = Colors.white;
-    } else if (inRange) {
-      bg = Theme.of(context).colorScheme.primary.withOpacity(0.15);
+  bool _isSelected(DateTime d) {
+    if (_start != null && _isSameDay(d, _start!)) return true;
+    if (_end != null && _isSameDay(d, _end!)) return true;
+    if (_start != null && _end != null) {
+      return d.isAfter(_start!) && d.isBefore(_end!);
     }
+    return false;
+  }
 
-    return GestureDetector(
-      onTap: isFuture || !inMonth ? null : () => _onDayTap(day),
-      child: Container(
-        margin: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          '${day.day}',
-          style: TextStyle(
-            color: textColor,
-            fontWeight: (isStart || isEnd)
-                ? FontWeight.bold
-                : FontWeight.normal,
-          ),
-        ),
-      ),
-    );
+  bool _isEndpoint(DateTime d) {
+    if (_start != null && _isSameDay(d, _start!)) return true;
+    if (_end != null && _isSameDay(d, _end!)) return true;
+    return false;
   }
 
   List<Widget> _buildCalendarDays() {
-    final firstOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
-    final lastOfMonth = DateTime(
+    final firstDayOfMonth = DateTime(
       _focusedMonth.year,
-      _focusedMonth.month + 1,
-      0,
+      _focusedMonth.month,
+      1,
     );
-    final startWeekday = firstOfMonth.weekday % 7; // Mon=1..Sun=7 -> 0=Sun
+    final daysInMonth = DateUtils.getDaysInMonth(
+      _focusedMonth.year,
+      _focusedMonth.month,
+    );
+    final offset = firstDayOfMonth.weekday % 7;
+    final List<Widget> cells = [];
 
-    final cells = <Widget>[];
-    for (int i = 0; i < startWeekday; i++) {
-      final d = firstOfMonth.subtract(Duration(days: startWeekday - i));
-      cells.add(_buildDay(d, false));
+    for (int i = 0; i < offset; i++) {
+      cells.add(const SizedBox.shrink());
     }
-    for (int d = 1; d <= lastOfMonth.day; d++) {
+
+    for (int i = 1; i <= daysInMonth; i++) {
+      final d = DateTime(_focusedMonth.year, _focusedMonth.month, i);
+      final selected = _isSelected(d);
+      final endpoint = _isEndpoint(d);
+
       cells.add(
-        _buildDay(DateTime(_focusedMonth.year, _focusedMonth.month, d), true),
+        GestureDetector(
+          onTap: () => _handleTap(d),
+          child: Container(
+            margin: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: endpoint
+                  ? Theme.of(context).colorScheme.primary
+                  : selected
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                '$i',
+                style: TextStyle(
+                  color: endpoint
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : selected
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Colors.black87,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
+          ),
+        ),
       );
-    }
-    while (cells.length % 7 != 0) {
-      final d = lastOfMonth.add(
-        Duration(days: cells.length - lastOfMonth.day - startWeekday + 1),
-      );
-      cells.add(_buildDay(d, false));
     }
     return cells;
   }
 
   String _selectionLabel() {
-    if (_start == null) return 'Tap a day to select';
-    final fmt = DateFormat('MMM d, yyyy');
-    if (_end == null)
-      return '${fmt.format(_start!)}  —  tap end date (or Search)';
-    if (_isSameDay(_start!, _end!)) return fmt.format(_start!);
-    return '${fmt.format(_start!)}  -  ${fmt.format(_end!)}';
+    if (_start == null) return 'Select start date';
+    if (_end == null) {
+      return 'Start: ${DateFormat('MMM d, yyyy').format(_start!)}';
+    }
+    final s = DateFormat('MMM d').format(_start!);
+    final e = DateFormat('MMM d, yyyy').format(_end!);
+    if (_isSameDay(_start!, _end!)) return s;
+    return '$s - $e';
   }
 
   @override
@@ -267,7 +267,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 }
 
-class FilterBar extends ConsumerWidget implements PreferredSizeWidget {
+class FilterBar extends ConsumerWidget {
   const FilterBar({super.key});
 
   @override
@@ -279,92 +279,136 @@ class FilterBar extends ConsumerWidget implements PreferredSizeWidget {
         category != null || dateRange != null || query.isNotEmpty;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Column(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
         children: [
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search by title or note',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: query.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () =>
-                          ref.read(searchQueryProvider.notifier).state = '',
-                    )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+          Expanded(
+            flex: 2,
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              isDense: true,
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search',
+                  hintStyle: const TextStyle(
+                    color: Colors.black38,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Colors.black38,
+                    size: 20,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  suffixIcon: query.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 16),
+                          padding: EdgeInsets.zero,
+                          onPressed: () =>
+                              ref.read(searchQueryProvider.notifier).state = '',
+                        )
+                      : null,
+                ),
+                onChanged: (v) =>
+                    ref.read(searchQueryProvider.notifier).state = v,
+              ),
             ),
-            onChanged: (v) => ref.read(searchQueryProvider.notifier).state = v,
           ),
-          const SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                DropdownButton<ExpenseCategory?>(
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 1,
+            child: Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFEFEF),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<ExpenseCategory?>(
+                  isExpanded: true,
                   value: category,
-                  hint: const Text('Category'),
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 16,
+                    color: Colors.black54,
+                  ),
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                   items: [
                     const DropdownMenuItem(
                       value: null,
-                      child: Text('All categories'),
+                      child: Text('Category', overflow: TextOverflow.ellipsis),
                     ),
                     ...ExpenseCategory.values.map(
-                      (c) => DropdownMenuItem(value: c, child: Text(c.label)),
+                      (c) => DropdownMenuItem(
+                        value: c,
+                        child: Text(c.label, overflow: TextOverflow.ellipsis),
+                      ),
                     ),
                   ],
                   onChanged: (v) =>
                       ref.read(categoryFilterProvider.notifier).state = v,
                 ),
-                const SizedBox(width: 12),
-                ActionChip(
-                  avatar: Icon(
-                    Icons.date_range,
-                    size: 18,
-                    color: dateRange != null
-                        ? Theme.of(context).colorScheme.primary
-                        : null,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () async {
+              final picked = await _showCustomDatePicker(
+                context,
+                initialRange: dateRange,
+              );
+              if (picked == null) return;
+              if (picked.start == _kClearSentinel.start &&
+                  picked.end == _kClearSentinel.end) {
+                ref.read(dateRangeFilterProvider.notifier).state = null;
+              } else {
+                ref.read(dateRangeFilterProvider.notifier).state = picked;
+              }
+            },
+            child: Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFEFEF),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    dateRange == null ? 'Date' : _formatRange(dateRange),
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  label: Text(
-                    dateRange == null ? 'Date range' : _formatRange(dateRange),
-                    style: dateRange != null
-                        ? TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          )
-                        : null,
-                  ),
-                  onPressed: () async {
-                    final picked = await _showCustomDatePicker(
-                      context,
-                      initialRange: dateRange,
-                    );
-                    if (picked == null) return; // cancelled
-                    if (picked.start == _kClearSentinel.start &&
-                        picked.end == _kClearSentinel.end) {
-                      // user pressed Clear inside dialog
-                      ref.read(dateRangeFilterProvider.notifier).state = null;
-                    } else {
-                      ref.read(dateRangeFilterProvider.notifier).state = picked;
-                    }
-                  },
-                ),
-                if (hasActiveFilters) ...[
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: () {
-                      ref.read(categoryFilterProvider.notifier).state = null;
-                      ref.read(dateRangeFilterProvider.notifier).state = null;
-                      ref.read(searchQueryProvider.notifier).state = '';
-                    },
-                    child: const Text('Clear all'),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 16,
+                    color: Colors.black54,
                   ),
                 ],
-              ],
+              ),
             ),
           ),
         ],
@@ -380,7 +424,4 @@ class FilterBar extends ConsumerWidget implements PreferredSizeWidget {
     if (isSameDay) return DateFormat('MMM d, yyyy').format(r.start);
     return '${DateFormat('MMM d').format(r.start)} - ${DateFormat('MMM d').format(r.end)}';
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(96);
 }
