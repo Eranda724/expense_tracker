@@ -99,38 +99,203 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
     }
   }
 
+  IconData _getIconForCategory(ExpenseCategory category) {
+    switch (category) {
+      case ExpenseCategory.food:
+        return Icons.restaurant;
+      case ExpenseCategory.transport:
+        return Icons.directions_car;
+      case ExpenseCategory.entertainment:
+        return Icons.movie;
+      case ExpenseCategory.shopping:
+        return Icons.shopping_bag;
+      case ExpenseCategory.bills:
+        return Icons.receipt;
+      case ExpenseCategory.other:
+        return Icons.category;
+      case ExpenseCategory.health:
+        return Icons.favorite;
+    }
+  }
+
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, top: 16),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Edit Expense' : 'Add Expense')),
+      backgroundColor: const Color(0xFFF9F9F9),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF9F9F9),
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.black87),
+        title: Text(
+          _isEditing ? 'Edit Expense' : 'Add Expense',
+          style: const TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              // Title — capped at 50 chars
+              _buildLabel('Title'),
               TextFormField(
                 controller: _titleCtrl,
                 maxLength: 50,
-                decoration: const InputDecoration(labelText: 'Title'),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.black26),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.black26),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF166048)),
+                  ),
+                ),
                 validator: (v) => (v == null || v.trim().isEmpty)
                     ? 'Title is required'
                     : null,
               ),
-              const SizedBox(height: 12),
-              // Amount — restricted to 2 dp at input level
+              _buildLabel('Category'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.black26),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<ExpenseCategory>(
+                          value: _category,
+                          isExpanded: true,
+                          icon: const Padding(
+                            padding: EdgeInsets.only(left: 12.0),
+                            child: Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          items: ExpenseCategory.values.map((c) {
+                            return DropdownMenuItem(
+                              value: c,
+                              child: Text(
+                                c.label,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (v) => setState(() => _category = v!),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF166048),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      _getIconForCategory(_category),
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ],
+              ),
+              _buildLabel('Date'),
+              InkWell(
+                onTap: _pickDate,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.black26),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today, color: Colors.black54),
+                      const SizedBox(width: 12),
+                      Text(
+                        DateFormat('MMM d, yyyy').format(_date),
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              _buildLabel('Amount'),
               TextFormField(
                 controller: _amountCtrl,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
+                style: const TextStyle(fontSize: 28, color: Colors.black87),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
-                decoration: const InputDecoration(
-                  labelText: 'Amount',
+                decoration: InputDecoration(
                   prefixText: r'$ ',
+                  prefixStyle: const TextStyle(
+                    fontSize: 28,
+                    color: Colors.black54,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 20,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.black26),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.black26),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF166048)),
+                  ),
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
@@ -143,32 +308,28 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<ExpenseCategory>(
-                value: _category,
-                decoration: const InputDecoration(labelText: 'Category'),
-                items: ExpenseCategory.values
-                    .map(
-                      (c) => DropdownMenuItem(value: c, child: Text(c.label)),
-                    )
-                    .toList(),
-                onChanged: (v) => setState(() => _category = v!),
-              ),
-              const SizedBox(height: 12),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Date'),
-                subtitle: Text(DateFormat('MMM d, yyyy').format(_date)),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: _pickDate,
-              ),
-              const SizedBox(height: 12),
-              // Note — capped at 200 chars
+              _buildLabel('Note'),
               TextFormField(
                 controller: _noteCtrl,
-                decoration: const InputDecoration(labelText: 'Note (optional)'),
                 maxLines: 3,
                 maxLength: 200,
+                decoration: InputDecoration(
+                  hintText: 'Note (optional)',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.black26),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.black26),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF166048)),
+                  ),
+                ),
               ),
               if (_errorText != null) ...[
                 const SizedBox(height: 12),
@@ -176,14 +337,31 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
               ],
               const SizedBox(height: 24),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF166048),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  minimumSize: const Size(double.infinity, 56),
+                ),
                 onPressed: _isSaving ? null : _save,
                 child: _isSaving
                     ? const SizedBox(
                         height: 20,
                         width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
-                    : Text(_isEditing ? 'Update' : 'Save'),
+                    : Text(
+                        _isEditing ? 'Update' : 'Save',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ],
           ),
