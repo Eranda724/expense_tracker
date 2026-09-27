@@ -50,13 +50,13 @@ class ExpenseTile extends StatelessWidget {
         );
       },
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -65,15 +65,15 @@ class ExpenseTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              height: 56,
-              width: 56,
+              height: 44,
+              width: 44,
               decoration: BoxDecoration(
                 color: const Color(0xFFC2F1DF), // light green
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(iconData, color: const Color(0xFF166048), size: 28),
+              child: Icon(iconData, color: const Color(0xFF166048), size: 22),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +83,7 @@ class ExpenseTile extends StatelessWidget {
                     expense.title,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 14,
                       color: Colors.black87,
                     ),
                     maxLines: 1,
@@ -92,7 +92,7 @@ class ExpenseTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     (expense.note == null || expense.note!.isEmpty) ? 'Title' : expense.note!,
-                    style: const TextStyle(color: Colors.black87, fontSize: 13),
+                    style: const TextStyle(color: Colors.black87, fontSize: 12),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -107,14 +107,14 @@ class ExpenseTile extends StatelessWidget {
                   fmtAmt,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 14,
                     color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   fmtDate,
-                  style: const TextStyle(color: Colors.black87, fontSize: 13),
+                  style: const TextStyle(color: Colors.black87, fontSize: 12),
                 ),
               ],
             ),

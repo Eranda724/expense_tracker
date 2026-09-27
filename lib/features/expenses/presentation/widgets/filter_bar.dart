@@ -268,147 +268,187 @@ class _CustomDateRangePickerDialogState
 }
 
 class FilterBar extends ConsumerWidget {
-  const FilterBar({super.key});
+  final bool showOnlyDateFilter;
+
+  const FilterBar({super.key, this.showOnlyDateFilter = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final category = ref.watch(categoryFilterProvider);
     final dateRange = ref.watch(dateRangeFilterProvider);
     final query = ref.watch(searchQueryProvider);
-    final hasActiveFilters =
-        category != null || dateRange != null || query.isNotEmpty;
+    final hasActiveFilters = showOnlyDateFilter
+        ? dateRange != null
+        : (category != null || dateRange != null || query.isNotEmpty);
+
+    final dateFilterWidget = GestureDetector(
+      onTap: () async {
+        final picked = await _showCustomDatePicker(
+          context,
+          initialRange: dateRange,
+        );
+        if (picked == null) return;
+        if (picked.start == _kClearSentinel.start &&
+            picked.end == _kClearSentinel.end) {
+          ref.read(dateRangeFilterProvider.notifier).state = null;
+        } else {
+          ref.read(dateRangeFilterProvider.notifier).state = picked;
+        }
+      },
+      child: Container(
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEFEFEF),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(
+                dateRange == null
+                    ? (showOnlyDateFilter ? 'Filter by Date' : 'Date')
+                    : _formatRange(dateRange),
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.keyboard_arrow_down,
+              size: 16,
+              color: Colors.black54,
+            ),
+          ],
+        ),
+      ),
+    );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.only(left: 20, right: 4),
       child: Row(
         children: [
-          Expanded(
-            flex: 2,
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  hintStyle: const TextStyle(
-                    color: Colors.black38,
-                    fontSize: 14,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: Colors.black38,
-                    size: 20,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                  suffixIcon: query.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 16),
-                          padding: EdgeInsets.zero,
-                          onPressed: () =>
-                              ref.read(searchQueryProvider.notifier).state = '',
-                        )
-                      : null,
-                ),
-                onChanged: (v) =>
-                    ref.read(searchQueryProvider.notifier).state = v,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            flex: 1,
-            child: Container(
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEFEFEF),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<ExpenseCategory?>(
-                  isExpanded: true,
-                  value: category,
-                  icon: const Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 16,
-                    color: Colors.black54,
-                  ),
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('Category', overflow: TextOverflow.ellipsis),
-                    ),
-                    ...ExpenseCategory.values.map(
-                      (c) => DropdownMenuItem(
-                        value: c,
-                        child: Text(c.label, overflow: TextOverflow.ellipsis),
-                      ),
+          if (!showOnlyDateFilter) ...[
+            Expanded(
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
+                ),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search',
+                    hintStyle: const TextStyle(
+                      color: Colors.black38,
+                      fontSize: 14,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Colors.black38,
+                      size: 20,
+                    ),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    suffixIcon: query.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 16),
+                            padding: EdgeInsets.zero,
+                            onPressed: () =>
+                                ref.read(searchQueryProvider.notifier).state =
+                                    '',
+                          )
+                        : null,
+                  ),
                   onChanged: (v) =>
-                      ref.read(categoryFilterProvider.notifier).state = v,
+                      ref.read(searchQueryProvider.notifier).state = v,
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () async {
-              final picked = await _showCustomDatePicker(
-                context,
-                initialRange: dateRange,
-              );
-              if (picked == null) return;
-              if (picked.start == _kClearSentinel.start &&
-                  picked.end == _kClearSentinel.end) {
-                ref.read(dateRangeFilterProvider.notifier).state = null;
-              } else {
-                ref.read(dateRangeFilterProvider.notifier).state = picked;
-              }
-            },
-            child: Container(
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEFEFEF),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    dateRange == null ? 'Date' : _formatRange(dateRange),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Container(
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFEFEF),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<ExpenseCategory?>(
+                    isExpanded: true,
+                    value: category,
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 16,
+                      color: Colors.black54,
+                    ),
                     style: const TextStyle(
                       color: Colors.black87,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text(
+                          'Category',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      ...ExpenseCategory.values.map(
+                        (c) => DropdownMenuItem(
+                          value: c,
+                          child: Text(c.label, overflow: TextOverflow.ellipsis),
+                        ),
+                      ),
+                    ],
+                    onChanged: (v) =>
+                        ref.read(categoryFilterProvider.notifier).state = v,
                   ),
-                  const SizedBox(width: 4),
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 16,
-                    color: Colors.black54,
-                  ),
-                ],
+                ),
               ),
+            ),
+            const SizedBox(width: 8),
+            dateFilterWidget,
+          ] else ...[
+            const Spacer(),
+            dateFilterWidget,
+          ],
+          const SizedBox(width: 4),
+          Visibility(
+            visible: hasActiveFilters,
+            maintainSize: true,
+            maintainAnimation: true,
+            maintainState: true,
+            child: IconButton(
+              onPressed: () {
+                ref.read(categoryFilterProvider.notifier).state = null;
+                ref.read(dateRangeFilterProvider.notifier).state = null;
+                ref.read(searchQueryProvider.notifier).state = '';
+              },
+              icon: const Icon(Icons.filter_alt_off, size: 20),
+              color: Colors.redAccent,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
             ),
           ),
         ],
@@ -421,7 +461,7 @@ class FilterBar extends ConsumerWidget {
         r.start.year == r.end.year &&
         r.start.month == r.end.month &&
         r.start.day == r.end.day;
-    if (isSameDay) return DateFormat('MMM d, yyyy').format(r.start);
+    if (isSameDay) return DateFormat('MMM d').format(r.start);
     return '${DateFormat('MMM d').format(r.start)} - ${DateFormat('MMM d').format(r.end)}';
   }
 }

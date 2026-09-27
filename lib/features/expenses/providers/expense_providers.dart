@@ -40,19 +40,37 @@ final monthlyExpensesProvider = Provider<AsyncValue<List<Expense>>>((ref) {
   });
 });
 
-/// Sum of amounts for the selected month.
-final monthlyTotalProvider = Provider<AsyncValue<double>>((ref) {
-  final monthlyAsync = ref.watch(monthlyExpensesProvider);
-  return monthlyAsync.whenData((expenses) {
-    return expenses.fold<double>(0, (sum, e) => sum + e.amount);
+/// Expenses filtered ONLY by the selected Date (ignores category and search).
+/// Used by the Summary tab where search/category filters are hidden.
+final summaryExpensesProvider = Provider<AsyncValue<List<Expense>>>((ref) {
+  final dateRange = ref.watch(dateRangeFilterProvider);
+  final baseAsync = dateRange != null
+      ? ref.watch(expensesStreamProvider)
+      : ref.watch(monthlyExpensesProvider);
+
+  return baseAsync.whenData((expenses) {
+    if (dateRange == null) return expenses;
+    return expenses.where((e) {
+      final afterStart = !e.date.isBefore(dateRange.start);
+      final beforeEnd = !e.date.isAfter(dateRange.end);
+      return afterStart && beforeEnd;
+    }).toList();
   });
 });
 
-/// Category -> total amount, for the selected month.
+/// Sum of amounts for the summary expenses.
+final monthlyTotalProvider = Provider<AsyncValue<double>>((ref) {
+  final summaryAsync = ref.watch(summaryExpensesProvider);
+  return summaryAsync.whenData((expenses) {
+    return expenses.fold<double>(0, (total, e) => total + e.amount);
+  });
+});
+
+/// Category -> total amount, for the summary expenses.
 final categorySummaryProvider =
     Provider<AsyncValue<Map<ExpenseCategory, double>>>((ref) {
-      final monthlyAsync = ref.watch(monthlyExpensesProvider);
-      return monthlyAsync.whenData((expenses) {
+      final summaryAsync = ref.watch(summaryExpensesProvider);
+      return summaryAsync.whenData((expenses) {
         final map = <ExpenseCategory, double>{};
         for (final e in expenses) {
           map[e.category] = (map[e.category] ?? 0) + e.amount;
