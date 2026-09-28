@@ -27,7 +27,7 @@ class MyApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp(
-      title: 'Expense Tracker',
+      title: 'Wiyaflow',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,

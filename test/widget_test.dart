@@ -33,13 +33,13 @@ void main() {
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             home: const Scaffold(
-              body: Center(child: Text('Expense Tracker')),
+              body: Center(child: Text('Wiyaflow')),
             ),
           ),
         ),
       );
 
-      expect(find.text('Expense Tracker'), findsOneWidget);
+      expect(find.text('Wiyaflow'), findsOneWidget);
     });
 
     testWidgets('dark theme renders correctly in widget tree', (tester) async {

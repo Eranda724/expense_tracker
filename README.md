@@ -1,4 +1,4 @@
-# Expense Tracker
+# Wiyaflow
 
 A personal finance app built with Flutter and Firebase that lets you log, categorize, and visualize your expenses — with full dark mode support.
 
