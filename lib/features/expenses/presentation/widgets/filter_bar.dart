@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/categories.dart';
-import '../../data/models/expense.dart';
 import '../../providers/expense_providers.dart';
 
 final _kClearSentinel = DateTimeRange(
@@ -126,7 +125,7 @@ class _CustomDateRangePickerDialogState
                       ? Theme.of(context).colorScheme.onPrimary
                       : selected
                       ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Colors.black87,
+                      : Theme.of(context).colorScheme.onSurface,
                   fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -221,7 +220,11 @@ class _CustomDateRangePickerDialogState
             const SizedBox(height: 8),
             Text(
               _selectionLabel(),
-              style: const TextStyle(fontSize: 12, color: Colors.black54),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurface
+                    .withValues(alpha: 0.6),
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -299,7 +302,7 @@ class FilterBar extends ConsumerWidget {
         height: 40,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFEFEFEF),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
         ),
         alignment: Alignment.center,
@@ -312,8 +315,8 @@ class FilterBar extends ConsumerWidget {
                 dateRange == null
                     ? (showOnlyDateFilter ? 'Filter by Date' : 'Date')
                     : _formatRange(dateRange),
-                style: const TextStyle(
-                  color: Colors.black87,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -321,10 +324,11 @@ class FilterBar extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(
+            Icon(
               Icons.keyboard_arrow_down,
               size: 16,
-              color: Colors.black54,
+              color: Theme.of(context).colorScheme.onSurface
+                  .withValues(alpha: 0.54),
             ),
           ],
         ),
@@ -340,7 +344,7 @@ class FilterBar extends ConsumerWidget {
               child: Container(
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -353,13 +357,15 @@ class FilterBar extends ConsumerWidget {
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Search',
-                    hintStyle: const TextStyle(
-                      color: Colors.black38,
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface
+                          .withValues(alpha: 0.38),
                       fontSize: 14,
                     ),
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.search,
-                      color: Colors.black38,
+                      color: Theme.of(context).colorScheme.onSurface
+                          .withValues(alpha: 0.38),
                       size: 20,
                     ),
                     prefixIconConstraints: const BoxConstraints(
@@ -389,20 +395,21 @@ class FilterBar extends ConsumerWidget {
                 height: 40,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFEFEF),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<ExpenseCategory?>(
                     isExpanded: true,
                     value: category,
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.keyboard_arrow_down,
                       size: 16,
-                      color: Colors.black54,
+                      color: Theme.of(context).colorScheme.onSurface
+                          .withValues(alpha: 0.54),
                     ),
-                    style: const TextStyle(
-                      color: Colors.black87,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),

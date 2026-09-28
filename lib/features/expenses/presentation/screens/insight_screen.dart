@@ -27,7 +27,7 @@ class InsightTabContent extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: SizedBox(
               height: 250,
-              child: _buildBarChart(sortedCategories),
+              child: _buildBarChart(context, sortedCategories),
             ),
           ),
           const SizedBox(height: 16),
@@ -35,7 +35,7 @@ class InsightTabContent extends ConsumerWidget {
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
               itemCount: sortedCategories.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final cat = sortedCategories[index].key;
                 final amount = sortedCategories[index].value;
@@ -49,11 +49,11 @@ class InsightTabContent extends ConsumerWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.03),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -65,13 +65,13 @@ class InsightTabContent extends ConsumerWidget {
                         height: 44,
                         width: 44,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFC2F1DF), // light green
+                          color: Theme.of(context).colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
                           _getIconForCategory(cat),
                           size: 22,
-                          color: const Color(0xFF166048),
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -82,17 +82,17 @@ class InsightTabContent extends ConsumerWidget {
                           children: [
                             Text(
                               cat.label,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
-                                color: Color(0xFF0D1512),
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '${percent.toStringAsFixed(1)}% of total',
-                              style: const TextStyle(
-                                color: Colors.black54,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                 fontSize: 12,
                               ),
                             ),
@@ -101,10 +101,10 @@ class InsightTabContent extends ConsumerWidget {
                       ),
                       Text(
                         NumberFormat.currency(symbol: '\$').format(amount),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
-                          color: Color(0xFF0D1512),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -119,6 +119,7 @@ class InsightTabContent extends ConsumerWidget {
   }
 
   Widget _buildBarChart(
+    BuildContext context,
     List<MapEntry<ExpenseCategory, double>> sortedCategories,
   ) {
     if (sortedCategories.isEmpty) {
@@ -159,7 +160,7 @@ class InsightTabContent extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.only(top: 32, right: 24, bottom: 16, left: 8),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 238, 232, 232), // ash color
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20),
       ),
       child: BarChart(
@@ -180,9 +181,9 @@ class InsightTabContent extends ConsumerWidget {
                       angle: -0.5,
                       child: Text(
                         sortedCategories[value.toInt()].key.label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
-                          color: Colors.black87,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     );
@@ -203,14 +204,14 @@ class InsightTabContent extends ConsumerWidget {
                     return const SizedBox.shrink();
                   }
                   if (value == 0) {
-                    return const Text(
+                    return Text(
                       '0',
-                      style: TextStyle(fontSize: 10, color: Colors.black54),
+                      style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
                     );
                   }
                   return Text(
                     NumberFormat.compactCurrency(symbol: '\$').format(value),
-                    style: const TextStyle(fontSize: 10, color: Colors.black54),
+                    style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
                   );
                 },
               ),
@@ -245,9 +246,9 @@ class InsightTabContent extends ConsumerWidget {
           ),
           borderData: FlBorderData(
             show: true,
-            border: const Border(
-              bottom: BorderSide(color: Colors.black54, width: 1.5),
-              left: BorderSide(color: Colors.black54, width: 1.5),
+            border: Border(
+              bottom: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6), width: 1.5),
+              left: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6), width: 1.5),
               right: BorderSide.none,
               top: BorderSide.none,
             ),

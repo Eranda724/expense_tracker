@@ -52,11 +52,11 @@ class ExpenseTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -68,10 +68,10 @@ class ExpenseTile extends StatelessWidget {
               height: 44,
               width: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFFC2F1DF), // light green
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(iconData, color: const Color(0xFF166048), size: 22),
+              child: Icon(iconData, color: Theme.of(context).colorScheme.onPrimaryContainer, size: 22),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -81,10 +81,10 @@ class ExpenseTile extends StatelessWidget {
                 children: [
                   Text(
                     expense.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -92,7 +92,7 @@ class ExpenseTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     (expense.note == null || expense.note!.isEmpty) ? 'Title' : expense.note!,
-                    style: const TextStyle(color: Colors.black87, fontSize: 12),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 12),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -105,16 +105,16 @@ class ExpenseTile extends StatelessWidget {
               children: [
                 Text(
                   fmtAmt,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   fmtDate,
-                  style: const TextStyle(color: Colors.black87, fontSize: 12),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 12),
                 ),
               ],
             ),

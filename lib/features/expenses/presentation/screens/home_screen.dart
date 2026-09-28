@@ -26,7 +26,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final filteredAsync = ref.watch(filteredExpensesProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF2C394B),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -42,8 +42,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   PopupMenuButton<String>(
-                    icon: const Icon(Icons.settings, color: Color(0xFF3DF2A4)),
-                    color: const Color(0xFF2C394B),
+                    icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.primary),
+                    color: Theme.of(context).colorScheme.surface,
                     onSelected: (value) {
                       if (value == 'theme') {
                         ref.read(themeModeProvider.notifier).toggle();
@@ -61,25 +61,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             children: [
                               Icon(
                                 isDark ? Icons.light_mode : Icons.dark_mode,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 isDark ? 'Light Mode' : 'Dark Mode',
-                                style: const TextStyle(color: Colors.white),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                               ),
                             ],
                           ),
                         ),
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'logout',
                           child: Row(
                             children: [
-                              Icon(Icons.logout, color: Colors.white),
-                              SizedBox(width: 8),
+                              Icon(Icons.logout, color: Theme.of(context).colorScheme.onSurface),
+                              const SizedBox(width: 8),
                               Text(
                                 'Logout',
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                               ),
                             ],
                           ),
@@ -87,26 +87,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ];
                     },
                   ),
-                  const Row(
+                  Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         'Wiyafl',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Icon(
                         Icons.monetization_on,
-                        color: Color(0xFF3DF2A4),
+                        color: Theme.of(context).colorScheme.primary,
                         size: 22,
                       ),
                       Text(
                         'w',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
@@ -130,7 +130,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Container(
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1B263B),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -143,7 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: _selectedTab == 0
-                                ? const Color(0xFF3DF2A4)
+                                ? Theme.of(context).colorScheme.primary
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -152,8 +152,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               'Home',
                               style: TextStyle(
                                 color: _selectedTab == 0
-                                    ? const Color(0xFF0D1512)
-                                    : Colors.white,
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).colorScheme.onSurface,
                                 fontWeight: _selectedTab == 0
                                     ? FontWeight.bold
                                     : FontWeight.w500,
@@ -171,7 +171,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: _selectedTab == 1
-                                ? const Color(0xFF3DF2A4)
+                                ? Theme.of(context).colorScheme.primary
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -180,8 +180,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               'Summary',
                               style: TextStyle(
                                 color: _selectedTab == 1
-                                    ? const Color(0xFF0D1512)
-                                    : Colors.white,
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).colorScheme.onSurface,
                                 fontWeight: _selectedTab == 1
                                     ? FontWeight.bold
                                     : FontWeight.w500,
@@ -200,9 +200,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF9F9F9),
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(32),
                     topRight: Radius.circular(32),
                   ),
@@ -237,7 +237,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 100,
                               ),
                               itemCount: expenses.length,
-                              separatorBuilder: (_, __) =>
+                              separatorBuilder: (_, _) =>
                                   const SizedBox(height: 12),
                               itemBuilder: (_, i) =>
                                   ExpenseTile(expense: expenses[i]),
@@ -270,7 +270,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF3DF2A4).withOpacity(0.4),
+              color: const Color(0xFF3DF2A4).withValues(alpha: 0.4),
               blurRadius: 16,
               spreadRadius: 4,
             ),
@@ -283,9 +283,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               MaterialPageRoute(builder: (_) => const AddEditExpenseScreen()),
             );
           },
-          backgroundColor: Colors.transparent,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           elevation: 0,
-          child: const Icon(Icons.add, size: 32, color: Color(0xFF0D1512)),
+          child: Icon(Icons.add, size: 32, color: Theme.of(context).colorScheme.onPrimary),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
