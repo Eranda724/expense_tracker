@@ -354,39 +354,48 @@ class FilterBar extends ConsumerWidget {
                     ),
                   ],
                 ),
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    hintText: 'Search',
-                    hintStyle: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface
-                          .withValues(alpha: 0.38),
-                      fontSize: 14,
-                    ),
-                    prefixIcon: Icon(
+                child: Row(
+                  children: [
+                    const SizedBox(width: 12),
+                    Icon(
                       Icons.search,
                       color: Theme.of(context).colorScheme.onSurface
                           .withValues(alpha: 0.38),
-                      size: 20,
+                      size: 16,
                     ),
-                    prefixIconConstraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
+                    Expanded(
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 13),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          hintText: 'Search',
+                          hintStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface
+                                .withValues(alpha: 0.38),
+                            fontSize: 13,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        onChanged: (v) =>
+                            ref.read(searchQueryProvider.notifier).state = v,
+                      ),
                     ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                    suffixIcon: query.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 16),
-                            padding: EdgeInsets.zero,
-                            onPressed: () =>
-                                ref.read(searchQueryProvider.notifier).state =
-                                    '',
-                          )
-                        : const SizedBox(width: 36),
-                  ),
-                  onChanged: (v) =>
-                      ref.read(searchQueryProvider.notifier).state = v,
+                    if (query.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.clear, size: 16),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 28,
+                          minHeight: 28,
+                        ),
+                        onPressed: () =>
+                            ref.read(searchQueryProvider.notifier).state = '',
+                      )
+                    else
+                      const SizedBox(width: 28), // Balances the prefix width for perfect centering
+                  ],
                 ),
               ),
             ),
