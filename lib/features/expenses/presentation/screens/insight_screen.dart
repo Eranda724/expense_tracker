@@ -137,8 +137,6 @@ class InsightTabContent extends ConsumerWidget {
     double normalizedMax = maxValue / magnitude;
 
     double niceMax;
-    // Allow the value to exceed the niceMax by up to 20% before jumping to the next tier.
-    // This perfectly handles values like 2550 in the 2500 tier (500 intervals).
     if (normalizedMax <= 1.2) {
       niceMax = 1.0;
     } else if (normalizedMax <= 3.0) {
@@ -149,12 +147,9 @@ class InsightTabContent extends ConsumerWidget {
       niceMax = 10.0;
     }
 
-    // The base maximum for the grid (e.g., 2500 for the 2.5 tier)
     double baseMax = niceMax * magnitude;
     double finalInterval = baseMax / 5;
 
-    // Set chart's maxY to either the base grid max, or slightly above the maxValue
-    // so the highest bar doesn't clip or touch the very top edge.
     double maxY = math.max(baseMax, maxValue * 1.02);
 
     return Container(
@@ -199,7 +194,6 @@ class InsightTabContent extends ConsumerWidget {
                 reservedSize: 40,
                 interval: finalInterval,
                 getTitlesWidget: (value, meta) {
-                  // Hide labels for the small padding above the maximum grid line
                   if (value > baseMax) {
                     return const SizedBox.shrink();
                   }
@@ -228,7 +222,6 @@ class InsightTabContent extends ConsumerWidget {
             drawVerticalLine: false,
             horizontalInterval: finalInterval,
             getDrawingHorizontalLine: (value) {
-              // Hide grid lines for the small padding above the maximum grid line
               if (value > baseMax) {
                 return const FlLine(color: Colors.transparent, strokeWidth: 0);
               }

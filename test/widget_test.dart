@@ -1,30 +1,61 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:expense_tracker/main.dart';
+import 'package:expense_tracker/core/theme/app_theme.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('AppTheme', () {
+    test('light theme has correct primary color', () {
+      final theme = AppTheme.light;
+      expect(theme.brightness, Brightness.light);
+      expect(theme.colorScheme.primary, const Color(0xFF166048));
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('dark theme has correct primary color', () {
+      final theme = AppTheme.dark;
+      expect(theme.brightness, Brightness.dark);
+      expect(theme.colorScheme.primary, const Color(0xFF4ADE80));
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('dark theme onSurfaceVariant is set for calendar visibility', () {
+      final theme = AppTheme.dark;
+      expect(theme.colorScheme.onSurfaceVariant, const Color(0xFFE0E0E0));
+    });
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  group('ProviderScope smoke test', () {
+    testWidgets('renders without crashing when wrapped in ProviderScope',
+        (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: const Scaffold(
+              body: Center(child: Text('Expense Tracker')),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Expense Tracker'), findsOneWidget);
+    });
+
+    testWidgets('dark theme renders correctly in widget tree', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            themeMode: ThemeMode.dark,
+            darkTheme: AppTheme.dark,
+            home: const Scaffold(
+              body: Center(child: Text('Dark Mode')),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Dark Mode'), findsOneWidget);
+    });
   });
 }

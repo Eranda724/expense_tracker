@@ -16,8 +16,8 @@ class MonthSummaryCard extends ConsumerWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF4A5A6D).withOpacity(0.9),
-            const Color(0xFF334254).withOpacity(0.9),
+            const Color(0xFF4A5A6D).withValues(alpha: 0.9),
+            const Color(0xFF334254).withValues(alpha: 0.9),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -25,7 +25,7 @@ class MonthSummaryCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -40,7 +40,7 @@ class MonthSummaryCard extends ConsumerWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   spreadRadius: 1,
                 ),
@@ -82,7 +82,7 @@ class MonthSummaryCard extends ConsumerWidget {
                   },
                   loading: () =>
                       const CircularProgressIndicator(color: Color(0xFF3DF2A4)),
-                  error: (_, __) => const Text(
+                  error: (_, _) => const Text(
                     'Error',
                     style: TextStyle(color: Colors.redAccent),
                   ),

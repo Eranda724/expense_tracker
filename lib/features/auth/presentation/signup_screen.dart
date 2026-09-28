@@ -130,8 +130,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   style: const TextStyle(color: Colors.white),
                   decoration: _fieldDecoration(),
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty)
+                    if (v == null || v.trim().isEmpty) {
                       return 'Email is required';
+                    }
                     final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
                     if (!regex.hasMatch(v.trim())) return 'Enter a valid email';
                     return null;
@@ -184,8 +185,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     ),
                   ),
                   validator: (v) {
-                    if (v != _passwordCtrl.text)
+                    if (v != _passwordCtrl.text) {
                       return 'Passwords do not match';
+                    }
                     return null;
                   },
                 ),

@@ -124,8 +124,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   style: const TextStyle(color: Colors.white),
                   decoration: _fieldDecoration(),
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty)
+                    if (v == null || v.trim().isEmpty) {
                       return 'Email is required';
+                    }
                     final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
                     if (!regex.hasMatch(v.trim())) return 'Enter a valid email';
                     return null;

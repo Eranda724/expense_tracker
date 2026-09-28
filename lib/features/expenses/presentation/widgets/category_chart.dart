@@ -8,8 +8,6 @@ import '../../providers/expense_providers.dart';
 class CategoryChart extends ConsumerWidget {
   const CategoryChart({super.key});
 
-  // Fixed color per category so the same category always renders the same
-  // color across sessions — avoids colors "shuffling" as data changes.
   static const _colors = {
     ExpenseCategory.food: Colors.orange,
     ExpenseCategory.transport: Colors.blue,
