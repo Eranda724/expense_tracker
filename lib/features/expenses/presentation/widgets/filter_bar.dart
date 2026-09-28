@@ -355,6 +355,7 @@ class FilterBar extends ConsumerWidget {
                   ],
                 ),
                 child: TextField(
+                  textAlign: TextAlign.center,
                   decoration: InputDecoration(
                     hintText: 'Search',
                     hintStyle: TextStyle(
@@ -382,7 +383,7 @@ class FilterBar extends ConsumerWidget {
                                 ref.read(searchQueryProvider.notifier).state =
                                     '',
                           )
-                        : null,
+                        : const SizedBox(width: 36),
                   ),
                   onChanged: (v) =>
                       ref.read(searchQueryProvider.notifier).state = v,
@@ -416,6 +417,7 @@ class FilterBar extends ConsumerWidget {
                     items: [
                       const DropdownMenuItem(
                         value: null,
+                        alignment: Alignment.center,
                         child: Text(
                           'Category',
                           overflow: TextOverflow.ellipsis,
@@ -424,6 +426,7 @@ class FilterBar extends ConsumerWidget {
                       ...ExpenseCategory.values.map(
                         (c) => DropdownMenuItem(
                           value: c,
+                          alignment: Alignment.center,
                           child: Text(c.label, overflow: TextOverflow.ellipsis),
                         ),
                       ),
